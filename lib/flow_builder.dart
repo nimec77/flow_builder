@@ -37,6 +37,7 @@ class FlowBuilder<T> extends StatefulWidget {
     @required this.onGeneratePages,
     this.onComplete,
     this.controller,
+    this.observers = const <NavigatorObserver>[],
   })  : assert(
           state != null || controller != null,
           'requires either state or controller',
@@ -61,6 +62,9 @@ class FlowBuilder<T> extends StatefulWidget {
   /// Optional [FlowController] which will be used in the current flow.
   /// If not provided, a [FlowController] instance will be created internally.
   final FlowController<T> controller;
+
+  /// A list of observers for this navigator.
+  final List<NavigatorObserver> observers;
 
   @override
   _FlowBuilderState<T> createState() => _FlowBuilderState<T>();
@@ -106,8 +110,7 @@ class _FlowBuilderState<T> extends State<FlowBuilder<T>> {
   }
 
   FlowController<T> _initController(T state) {
-    return _controller = (widget.controller ?? FlowController(state))
-      ..addListener(_listener);
+    return _controller = (widget.controller ?? FlowController(state))..addListener(_listener);
   }
 
   void _removeListeners({@required bool dispose}) {
@@ -178,6 +181,7 @@ class _FlowBuilderState<T> extends State<FlowBuilder<T>> {
             setState(() {});
             return route.didPop(result);
           },
+          observers: widget.observers,
         ),
       ),
     );
@@ -212,8 +216,7 @@ class _InheritedFlowController<T> extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(_InheritedFlowController<T> oldWidget) =>
-      oldWidget.controller != controller;
+  bool updateShouldNotify(_InheritedFlowController<T> oldWidget) => oldWidget.controller != controller;
 }
 
 /// {@template flow_extension}
